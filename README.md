@@ -12,9 +12,8 @@ ROS interface controlling the head+body `blender_api` rig.
 ```
 $ cd your_catkin_workspace
 $ git clone https://github.com/hansonrobotics/blender_api_msgs.git
-$ pip3 install ./blender_api_msgs
 $ cd ../
-$ catkin_make
+$ catkin build
 ```
 
 # Usage
