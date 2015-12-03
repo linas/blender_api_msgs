@@ -6,10 +6,14 @@ import queue
 
 import rospy
 import blender_api_msgs.msg as msg
+import blender_api_msgs.srv as srv
 import pau2motors.msg as paumsg
 import std_msgs.msg as stdmsg
+import geometry_msgs.msg as geomsg
+import logging
 
 api = None
+logger = logging.getLogger('hr.blender_api_msgs.roscom')
 
 # This is called by __init__.py
 # rigapi should be a (non-abstract-base-class) instance of RigAPI
@@ -54,8 +58,13 @@ class RosNode():
     def push(self):
         '''Create and publish messages to '@publish_live' decorated topics '''
         live_topics = [topic for topic in self.topics if isinstance(topic, publish_live)]
-        for topic in live_topics:
-            topic.publish()
+        try:
+            for topic in live_topics:
+                topic.publish()
+        except rospy.ROSException as ex:
+            logger.error(ex)
+            return False
+        return True
 
     # After this is called, blender will not ever poll us again.
     def drop(self):
@@ -117,6 +126,11 @@ class subscribe(CommandDecorator):
         # self.callback(IncomingCmd(self.cmd_func, msg))
         self.cmd_func(msg)
 
+class service(CommandDecorator):
+    def register(self):
+        self.serv = rospy.Service(self.topic, self.dataType, self._handle)
+    def _handle(self, msg):
+        return self.cmd_func(msg)
 
 class CommandWrappers:
     '''
@@ -212,7 +226,7 @@ class CommandWrappers:
         try:
             api.setGesture(msg.name, msg.repeat, msg.speed, msg.magnitude)
         except TypeError:
-            print('Error: unknown gesture:', msg.name);
+            logger.error('Unknown gesture: {}'.format(msg.name))
 
 
     # Visemes --------------------------------------
@@ -227,7 +241,7 @@ class CommandWrappers:
                 msg.duration.to_sec(),
                 msg.rampin, msg.rampout, msg.magnitude)
         except TypeError:
-            print('Error: unknown viseme:', msg.name);
+            logger.error('Unknown viseme: {}'.format(msg.name))
 
 
     # Look-at and turn-to-face targets ---------------------
@@ -269,3 +283,28 @@ class CommandWrappers:
 
         msg.m_coeffs = shapekeys.values()
         return msg
+
+    @subscribe("~set_neck_rotation", geomsg.Vector3)
+    def setNeckRotation(msg):
+        #sets only pitch and roll
+        api.setNeckRotation(msg.y, msg.x)
+
+    @subscribe("~set_blink_randomly",msg.BlinkCycle)
+    def setBlinkRandomly(msg):
+        api.setBlinkRandomly(msg.mean,msg.variation)
+
+    @subscribe("~set_saccade",msg.SaccadeCycle)
+    def setSaccade(msg):
+        api.setSaccade(msg.mean,msg.variation,msg.paint_scale,msg.eye_size,msg.eye_distance,msg.mouth_width,msg.mouth_height,msg.weight_eyes,msg.weight_mouth)
+
+    @service("~set_param", srv.SetParam)
+    def setParam(msg):
+        return srv.SetParamResponse(api.setParam(msg.key, msg.value))
+
+    @service("~get_param", srv.GetParam)
+    def getParam(msg):
+        return srv.GetParamResponse(api.getParam(msg.param))
+
+    @service("~get_animation_length", srv.GetAnimationLength)
+    def getAnimationLength(req):
+        return srv.GetAnimationLengthResponse(api.getAnimationLength(req.animation))

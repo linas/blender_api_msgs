@@ -49,10 +49,12 @@ add_message_files(
   AvailableEmotionStates.msg
   AvailableGestures.msg
   AvailableVisemes.msg
+  BlinkCycle.msg
   EmotionState.msg
   EmotionStates.msg
   Gesture.msg
   Gestures.msg
+  SaccadeCycle.msg
   SetGesture.msg
   SomaState.msg
   SomaStates.msg
@@ -62,10 +64,11 @@ add_message_files(
 )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   GetAPIVersion.srv
-# )
+  FILES
+  SetParam.srv
+  GetParam.srv
+  GetAnimationLength.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
