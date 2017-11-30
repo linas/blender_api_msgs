@@ -3,12 +3,12 @@ blender_api_msgs
 
 ROS interface controlling the head+body `blender_api` rig.
 
-# Design goals
+## Design goals
 * Avoids adding ROS code to the blender_api python module
 * Eliminates the need for other ROS nodes from having to import
   the blender_api python module.
 
-# Installation
+## Installation
 ```
 $ cd your_catkin_workspace/src
 $ git clone https://github.com/hansonrobotics/blender_api_msgs.git
@@ -30,16 +30,20 @@ diagnose. These are:
 
 * You might think that the correct catkin install path would be
   in python3.4 not python2.7 but you would be wrong: when sourcing
-  `devel/setup.sh`, only the 2.7 path is added to PYTHONPATH.
+  `devel/setup.sh`, only the 2.7 path is added to `PYTHONPATH`.
 
-# Usage
+## Usage
 Start blender from the `/blender_api` project.  If this package was
 installed with pip or setuptools, `blender_api` should discover it
 automatically.
 
-Bleder can be started with the **autostart script**:
+Blender can be started with the **autostart script**:
 ```
 blender -y Sophia.blend -P autostart.py
 ```
 or it can be started manually, by pressing the **Start Command
 Listener** button.
+
+## Copyright
+
+Copyright (c) 2014,2015,2106,2017 Hanson Robotics
